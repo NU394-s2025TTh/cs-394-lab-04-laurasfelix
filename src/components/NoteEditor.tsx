@@ -1,22 +1,17 @@
 // REFERENCE SOLUTION - Do not distribute to students
 // src/components/NoteEditor.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-// TODO: Import the saveNote function from your noteService call this to save the note to firebase
-//import { saveNote } from '../services/noteService';
+import { saveNote } from '../services/noteService';
 import { Note } from '../types/Note';
 
 interface NoteEditorProps {
   initialNote?: Note;
   onSave?: (note: Note) => void;
 }
-// remove the eslint disable when you implement on save
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
   // State for the current note being edited
-  // remove the eslint disable when you implement the state
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [note, setNote] = useState<Note>(() => {
     return (
       initialNote || {
@@ -27,6 +22,22 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
       }
     );
   });
+  const [error, setError] = useState();
+  // const [status, setStatus] = useState();
+  console.log(error);
+
+  useEffect(() => {
+    setNote(() => {
+      return (
+        initialNote || {
+          id: uuidv4(),
+          title: '',
+          content: '',
+          lastUpdated: Date.now(),
+        }
+      );
+    });
+  }, [initialNote]);
 
   // TODO: create state for saving status
   // TODO: createState for error handling
@@ -37,13 +48,21 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
 
   //TODO: on form submit create a "handleSubmit" function that saves the note to Firebase and calls the onSave callback if provided
   // This function should also handle any errors that occur during saving and update the error state accordingly
-
+  const handleSubmit = () => {
+    saveNote(note).catch((e) => setError(e));
+    onSave?.(note);
+  };
   // TODO: for each form field; add a change handler that updates the note state with the new value from the form
   // TODO: disable fields and the save button while saving is happening
   // TODO: for the save button, show "Saving..." while saving is happening and "Save Note" when not saving
   // TODO: show an error message if there is an error saving the note
   return (
-    <form className="note-editor">
+    <form
+      className="note-editor"
+      onSubmit={() => {
+        handleSubmit();
+      }}
+    >
       <div className="form-group">
         <label htmlFor="title">Title</label>
         <input
@@ -53,6 +72,13 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
           value={note.title}
           required
           placeholder="Enter note title"
+          onChange={(e) => {
+            console.log(note);
+            setNote((prevNote) => ({
+              ...prevNote,
+              title: e.target.value,
+            }));
+          }}
         />
       </div>
       <div className="form-group">
@@ -64,6 +90,12 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
           rows={5}
           required
           placeholder="Enter note content"
+          onChange={(e) => {
+            setNote((prevNote) => ({
+              ...prevNote,
+              content: e.target.value,
+            }));
+          }}
         />
       </div>
       <div className="form-actions">

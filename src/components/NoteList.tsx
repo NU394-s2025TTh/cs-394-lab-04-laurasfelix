@@ -1,7 +1,8 @@
 // src/components/NoteList.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useState } from 'react';
 
-// TODO: import { subscribeToNotes } from '../services/noteService';
+import { subscribeToNotes } from '../services/noteService';
 import { Note, Notes } from '../types/Note';
 import NoteItem from './NoteItem';
 
@@ -10,20 +11,32 @@ interface NoteListProps {
 }
 // TODO: remove the eslint-disable-next-line when you implement the onEditNote handler
 const NoteList: React.FC<NoteListProps> = ({ onEditNote }) => {
+  const [notes, setNotes] = useState<Notes>({});
+  const [error, setError] = useState<Error>();
+  const [loading, setLoading] = useState(true);
   // TODO: load notes using subscribeToNotes from noteService, use useEffect to manage the subscription; try/catch to handle errors (see lab 3)
-  // TODO: handle unsubscribing from the notes when the component unmounts
-  // TODO: manage state for notes, loading status, and error message
-  // TODO: display a loading message while notes are being loaded; error message if there is an error
+  useEffect(() => {
+    const unsub = subscribeToNotes(
+      (fetchedNotes) => {
+        setNotes(fetchedNotes);
+        setLoading(false);
+      },
+      (err) => {
+        setError(err);
+        setLoading(false);
+      },
+    );
 
-  // Notes is a constant in this template but needs to be a state variable in your implementation and load from firestore
-  const notes: Notes = {
-    '1': {
-      id: '1',
-      title: 'Note 1',
-      content: 'This is the content of note 1.',
-      lastUpdated: Date.now() - 100000,
-    },
-  };
+    return () => unsub();
+  }, []);
+
+  if (loading) {
+    return <div>Loading notes, hold! </div>;
+  }
+
+  if (error) {
+    return <div>Error loading notes: {error.message}</div>;
+  }
 
   return (
     <div className="note-list">
