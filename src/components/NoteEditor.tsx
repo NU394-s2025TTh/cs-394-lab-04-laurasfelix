@@ -22,9 +22,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
       }
     );
   });
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error>();
   const [isSaving, setIsSaving] = useState('Save Note');
-  console.log(error);
 
   useEffect(() => {
     setNote(() => {
@@ -51,7 +50,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
   const handleSubmit = () => {
     setIsSaving('Saving...');
     saveNote(note)
-      .catch((e) => setError(e))
+      .catch((e) => setError(e as Error))
       .finally(() => setIsSaving('Save Note'));
     onSave?.(note);
   };
@@ -102,6 +101,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
       <div className="form-actions">
         <button type="submit">{isSaving}</button>
       </div>
+      {error && <div className="error-message"> {error.message} </div>}
     </form>
   );
 };
