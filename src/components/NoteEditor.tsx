@@ -23,7 +23,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
     );
   });
   const [error, setError] = useState<Error>();
-  const [isSaving, setIsSaving] = useState('Save Note');
+  const [isSaving, setIsSaving] = useState(initialNote ? 'Update Note' : 'Save Note');
 
   useEffect(() => {
     setNote(() => {
@@ -47,12 +47,30 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
 
   //TODO: on form submit create a "handleSubmit" function that saves the note to Firebase and calls the onSave callback if provided
   // This function should also handle any errors that occur during saving and update the error state accordingly
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSaving('Saving...');
-    saveNote(note)
-      .catch((e) => setError(e as Error))
-      .finally(() => setIsSaving('Save Note'));
-    onSave?.(note);
+
+    const updatedNote = { ...note, lastUpdated: Date.now() };
+    setNote(updatedNote);
+
+    try {
+      await saveNote(updatedNote);
+      onSave?.(updatedNote);
+      setNote(() => {
+        return (
+          initialNote || {
+            id: uuidv4(),
+            title: '',
+            content: '',
+            lastUpdated: Date.now(),
+          }
+        );
+      });
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setIsSaving(initialNote ? 'Update Note' : 'Save Note');
+    }
   };
   // TODO: for each form field; add a change handler that updates the note state with the new value from the form
   // TODO: disable fields and the save button while saving is happening
@@ -72,6 +90,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
           id="title"
           name="title"
           required
+          disabled={isSaving == 'isSaving' ? true : false}
+          value={note.title}
           placeholder="Enter note title"
           onChange={(e) => {
             console.log(note);
@@ -87,7 +107,9 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
         <textarea
           id="content"
           name="content"
+          disabled={isSaving == 'isSaving' ? true : false}
           rows={5}
+          value={note.content}
           required
           placeholder="Enter note content"
           onChange={(e) => {
@@ -99,7 +121,9 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
         />
       </div>
       <div className="form-actions">
-        <button type="submit">{isSaving}</button>
+        <button type="submit" disabled={isSaving == 'isSaving' ? true : false}>
+          {isSaving}
+        </button>
       </div>
       {error && <div className="error-message"> {error.message} </div>}
     </form>
