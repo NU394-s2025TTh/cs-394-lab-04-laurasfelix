@@ -79,7 +79,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
   return (
     <form
       className="note-editor"
-      onSubmit={() => {
+      onSubmit={(e) => {
+        e.preventDefault();
         handleSubmit();
       }}
     >
@@ -90,7 +91,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
           id="title"
           name="title"
           required
-          disabled={isSaving == 'isSaving' ? true : false}
+          disabled={isSaving == 'Saving...' ? true : false}
           value={note.title}
           placeholder="Enter note title"
           onChange={(e) => {
@@ -107,7 +108,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
         <textarea
           id="content"
           name="content"
-          disabled={isSaving == 'isSaving' ? true : false}
+          disabled={isSaving == 'Saving...' ? true : false}
           rows={5}
           value={note.content}
           required
@@ -121,7 +122,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
         />
       </div>
       <div className="form-actions">
-        <button type="submit" disabled={isSaving == 'isSaving' ? true : false}>
+        <button type="submit" disabled={isSaving == 'Saving...' ? true : false}>
           {isSaving}
         </button>
       </div>
