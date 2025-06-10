@@ -1,19 +1,33 @@
 // REFERENCE SOLUTION - Do not distribute to students
 // src/components/NoteItem.tsx
-import React from 'react';
+import React, { useState } from 'react';
 
+import { deleteNote } from '../services/noteService';
 import { Note } from '../types/Note';
 
 interface NoteItemProps {
   note: Note;
   onEdit?: (note: Note) => void;
 }
-// TODO: delete eslint-disable-next-line when you implement the onEdit handler
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 const NoteItem: React.FC<NoteItemProps> = ({ note, onEdit }) => {
   // TODO: manage state for deleting status and error message
   // TODO: create a function to handle the delete action, which will display a confirmation (window.confirm) and call the deleteNote function from noteService,
   // and update the deleting status and error message accordingly
+  const [isDelete, setIsDelete] = useState(false);
+  const [error, setError] = useState<Error>();
+
+  const handleDelete = () => {
+    if (!window.confirm('This will delete your note.')) {
+      return;
+    }
+
+    setIsDelete(true);
+    deleteNote(note.id).catch((e) => {
+      setError(e as Error);
+      setIsDelete(false);
+    });
+  };
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -65,13 +79,30 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onEdit }) => {
   // TODO: disable the delete button and edit button while deleting
   // TODO: show error message if there is an error deleting the note
   // TODO: only show the edit button when the onEdit prop is provided
+
   return (
     <div className="note-item">
       <div className="note-header">
         <h3>{note.title}</h3>
         <div className="note-actions">
-          <button className="edit-button">Edit</button>
-          <button className="delete-button">{'Delete'}</button>
+          {onEdit && (
+            <button
+              className={`edit-button`}
+              disabled={isDelete}
+              onClick={() => {
+                onEdit?.(note);
+              }}
+            >
+              Edit
+            </button>
+          )}
+          <button
+            className={`delete-button`}
+            disabled={isDelete}
+            onClick={() => handleDelete()}
+          >
+            {isDelete ? 'Deleting...' : 'Delete'}
+          </button>
         </div>
       </div>
       <div className="note-content">{note.content}</div>
@@ -80,6 +111,7 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onEdit }) => {
           Last updated: {getTimeAgo(note.lastUpdated)}
         </span>
       </div>
+      {error && <div className="error-message">{error.message}</div>}
     </div>
   );
 };
