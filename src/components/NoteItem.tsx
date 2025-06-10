@@ -82,9 +82,11 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onEdit }) => {
   // TODO: disable the delete button and edit button while deleting
   // TODO: show error message if there is an error deleting the note
   // TODO: only show the edit button when the onEdit prop is provided
+  if (error != undefined) {
+    <div className="error-message">{error}</div>;
+  }
   return (
     <div className="note-item">
-      {error && <div className="error-message">{error}</div>}
       <div className="note-header">
         <h3>{note.title}</h3>
         <div className="note-actions">

@@ -23,7 +23,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
     );
   });
   const [error, setError] = useState();
-  // const [status, setStatus] = useState();
+  const [isSaving, setIsSaving] = useState('Save Note');
   console.log(error);
 
   useEffect(() => {
@@ -49,7 +49,10 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
   //TODO: on form submit create a "handleSubmit" function that saves the note to Firebase and calls the onSave callback if provided
   // This function should also handle any errors that occur during saving and update the error state accordingly
   const handleSubmit = () => {
-    saveNote(note).catch((e) => setError(e));
+    setIsSaving('Saving...');
+    saveNote(note)
+      .catch((e) => setError(e))
+      .finally(() => setIsSaving('Save Note'));
     onSave?.(note);
   };
   // TODO: for each form field; add a change handler that updates the note state with the new value from the form
@@ -69,7 +72,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
           type="text"
           id="title"
           name="title"
-          value={note.title}
           required
           placeholder="Enter note title"
           onChange={(e) => {
@@ -86,7 +88,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
         <textarea
           id="content"
           name="content"
-          value={note.content}
           rows={5}
           required
           placeholder="Enter note content"
@@ -99,7 +100,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ initialNote, onSave }) => {
         />
       </div>
       <div className="form-actions">
-        <button type="submit">{'Save Note'}</button>
+        <button type="submit">{isSaving}</button>
       </div>
     </form>
   );
