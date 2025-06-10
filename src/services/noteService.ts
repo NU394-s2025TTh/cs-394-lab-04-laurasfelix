@@ -30,7 +30,7 @@ export async function saveNote(note: Note): Promise<void> {
     await setDoc(doc(db, `${NOTES_COLLECTION}/${note.id}`), note);
     console.log('note saved');
   } catch (e) {
-    console.error('error adding note:', e);
+    console.error('Failed to add note..', e);
     throw e;
   }
 }
@@ -48,7 +48,7 @@ export async function deleteNote(noteId: string): Promise<void> {
     await deleteDoc(doc(db, `${NOTES_COLLECTION}/${noteId}`));
     console.log('note deleted');
   } catch (e) {
-    console.error('error deleting note:', e);
+    console.error('Failed to delete note...', e);
     throw e;
   }
 }

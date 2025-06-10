@@ -15,21 +15,18 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onEdit }) => {
   // TODO: create a function to handle the delete action, which will display a confirmation (window.confirm) and call the deleteNote function from noteService,
   // and update the deleting status and error message accordingly
   const [isDelete, setIsDelete] = useState(false);
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error>();
 
   const handleDelete = () => {
-    setIsDelete(true);
-
     if (!window.confirm('This will delete your note.')) {
-      setIsDelete(false);
       return;
     }
 
-    deleteNote(note.id)
-      .catch((e) => {
-        setError(e);
-      })
-      .finally(() => setIsDelete(false));
+    setIsDelete(true);
+    deleteNote(note.id).catch((e) => {
+      setError(e as Error);
+      setIsDelete(false);
+    });
   };
 
   const formatDate = (timestamp: number) => {
@@ -82,9 +79,7 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onEdit }) => {
   // TODO: disable the delete button and edit button while deleting
   // TODO: show error message if there is an error deleting the note
   // TODO: only show the edit button when the onEdit prop is provided
-  if (error != undefined) {
-    <div className="error-message">{error}</div>;
-  }
+
   return (
     <div className="note-item">
       <div className="note-header">
@@ -106,7 +101,7 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onEdit }) => {
             disabled={isDelete}
             onClick={() => handleDelete()}
           >
-            {'Delete'}
+            {isDelete ? 'Deleting...' : 'Delete'}
           </button>
         </div>
       </div>
@@ -116,6 +111,7 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, onEdit }) => {
           Last updated: {getTimeAgo(note.lastUpdated)}
         </span>
       </div>
+      {error && <div className="error-message">{error.message}</div>}
     </div>
   );
 };

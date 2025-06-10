@@ -16,18 +16,18 @@ const NoteList: React.FC<NoteListProps> = ({ onEditNote }) => {
   const [loading, setLoading] = useState(true);
   // TODO: load notes using subscribeToNotes from noteService, use useEffect to manage the subscription; try/catch to handle errors (see lab 3)
   useEffect(() => {
-    let unsub = () => {};
-    try {
-      unsub = subscribeToNotes((fetchedNotes) => {
+    const unsub = subscribeToNotes(
+      (fetchedNotes) => {
         setNotes(fetchedNotes);
         setLoading(false);
-      });
-    } catch (err) {
-      setError(err as Error);
-      setLoading(false);
-    }
+      },
+      (fetchError) => {
+        setError(fetchError);
+        setLoading(false);
+      },
+    );
 
-    return () => unsub();
+    return unsub;
   }, []);
 
   if (loading) {
